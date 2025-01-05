@@ -1,0 +1,1 @@
+A simple socket to test the implementation using C++'s `socket` library. This client connects to a server, sends a message, and waits for a response. It is useful for testing and debugging network applications.
