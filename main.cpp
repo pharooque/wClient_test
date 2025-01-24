@@ -122,6 +122,45 @@ int main(int argc, char const *argv[])
         ioctlsocket(clientSocket.getSocket(), FIONBIO, &mode); // Set blocking mode back
         std::cout << "Connected to server successfully\n";
         std::cout << "Ready to send and recieve data\n";
+
+        // Send and Receive loop
+        char sendBuffer[1024];
+        char recvBuffer[1024];
+        while (true)
+        {
+            std::cout << "Enter message to send (or 'exit' to quit): ";
+            std::cin.getline(sendBuffer, sizeof(sendBuffer));
+
+            // Exit condition
+            if (std::string_view(sendBuffer) == "exit")
+            {
+                break;
+            }
+
+            // Send data
+            if (send(clientSocket.getSocket(), sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
+            {
+                throw std::runtime_error("Failed to send data: " + std::to_string(WSAGetLastError()));
+            }
+            std::cout << "Message sent" << sendBuffer << '\n';
+
+            // Receive data
+            int bytesReceived = recv(clientSocket.getSocket(), recvBuffer, sizeof(recvBuffer) -1, 0);
+            if (bytesReceived > 0)
+            {
+                recvBuffer[bytesReceived] = '\0'; // Null-terminate the received data
+                std::cout << "Received: " << recvBuffer << '\n';
+            }
+            else if (bytesReceived == 0)
+            {
+                std::cout << "Connection closed by server\n";
+                break;
+            }
+            else
+            {
+                throw std::runtime_error("Failed to receive data: " + std::to_string(WSAGetLastError()));
+            }            
+        }
     }
     catch(const std::exception& e)
     {
